@@ -1,0 +1,92 @@
+<section class="content">
+  {% if errors != blank %}
+    <ul class="errors">
+      {% for error in errors %}
+        <li>{% if forloop.length != 1 %}&bull; {% endif %}{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if cart.items != blank %}
+    <h1>Subtotal</h1>
+    <h4>{{ cart.subtotal | money: theme.money_format }}</h4>
+  
+    <form method="post" action="/cart" class="cart_form">
+      <ul class="cart_details">
+        {% for item in cart.items %}
+        <li>
+          <a href="{{ item.product.url }}" class="product_image">
+            <img src="{{ item.product.image | product_image_url | constrain: '350' }}">
+          </a>
+          <div class="product_details">
+            <a href="{{ item.product.url }}">
+              {{ item.product.name }}
+              {% unless item.product.has_default_option %}
+                <em>{{ item.option.name }}</em>
+              {% endunless %}
+            </a>
+          </div>
+          <div class="product_actions">
+            <div class="quantity">{{ item | item_quantity_input }}</div>
+            <div class="price">{{ item.price | money: theme.money_format }}</div>
+            <div class="remove"><a href="#" class="remove"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path d="M7.924 6.51l-2.474-2.475 2.475-2.475c.196-.195.196-.512 0-.707l-.708-.753c-.195-.195-.512-.195-.707 0l-2.474 2.521-2.475-2.475c-.195-.195-.512-.195-.707 0l-.707.754c-.196.195-.196.5 0 .707l2.475 2.475-2.475 2.428c-.196.195-.196.5 0 .707l.707.7c.195.2.5.2.7 0l2.475-2.475 2.481 2.482c.195.2.5.2.7 0l.707-.707c.204-.217.183-.517-.017-.707z"/></svg></a></div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+  
+      {% if cart.shipping.enabled or cart.discount.enabled %}
+      	<ul class="cart_options">
+      	  <li class="cart_shipping">
+      	  {% if cart.shipping.enabled %}
+      	    {% if cart.shipping.strict %}
+      	      <div class="select">
+      		  	{{ store.country | country_select }}
+      		  	<svg xmlns="http://www.w3.org/2000/svg" width="10.001" height="6" viewBox="0 0 10.001 6"><path class="down_arrow" d="M9.852 1.537c.199-.189.199-.496 0-.684l-.717-.683c-.197-.19-.518-.19-.735 0l-3.384 3.33-3.434-3.357c-.199-.189-.52-.189-.717 0l-.717.683c-.197.188-.197.5 0 .684l4.508 4.3c.199.2.5.2.7 0l4.496-4.273z"/></svg>
+      	      </div>
+      	    
+      	    {% endif %}  
+      	  {% endif %}
+      	  
+      	  {% if cart.discount.enabled %}
+      	      <input autocomplete="off" id="cart_discount_code" name="cart[discount_code]" type="text" placeholder="Enter discount code" {% if cart.discount.code %}value="{{ cart.discount.code }}"{% endif %}>
+      	  {% endif %}
+      	  </li>
+      	  <li class="cart_totals">
+      	  	{% if cart.shipping.enabled %}
+      	  	<div>Shipping <span>
+      		  	
+              {% if cart.shipping.pending %}
+                {% if cart.country %}
+                Select another country
+                {% else %}
+                Select country
+                {% endif %}
+              {% else %}
+                {{ cart.shipping.amount | money: theme.money_format }}
+              {% endif %}
+      		 </span></div>
+      	  	{% endif %}
+      		{% if cart.discount.enabled %}
+      		  {% if cart.discount.pending %}
+      		    {% elsif cart.discount.free_shipping %}
+      		      <div>Discount <span>Free shipping!</span></div>
+      		    {% else %}
+      		      <div>Discount <span>- {{ cart.discount.amount | money: theme.money_format }}</span></div>
+      		  {% endif %}
+      		{% endif %}
+      	  	<div>Total <span>{{ cart.total | money: theme.money_format }}</span></div>
+      	  </li>
+      	</ul>   
+        <button class="update_btn" name="update" type="submit" title="Update your cart total">Update</button>    
+      {% endif %} 
+
+      <button class="checkout_btn" type="submit" name="checkout" title="Checkout">Checkout</button>
+    </form>
+
+  {% else %}
+    <div>
+      <p><strong>Your cart is empty!</strong> Sounds like a good time to <a href="/">start shopping &rarr;</a></p>
+    </div>
+  {% endif %}
+</section>
